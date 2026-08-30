@@ -1,0 +1,120 @@
+{
+  // Agent's role title — appears in prompts and logs.
+  // You can use {placeholder} inputs in role, goal, or backstory.
+  // Example: "role": "Senior {industry} Researcher"
+  "role": "Copywriter",
+
+  // Optional custom Agent subclass
+  // "type": {"python": "my_project.agents.CustomAgent"},
+
+  // The agent's primary objective
+  "goal": "Write clear, specific Instagram captions grounded in real product research, in the brand's actual voice \u2014 not generic marketing copy",
+
+  // Background story that shapes the agent's personality and approach.
+  // Rewritten 2026-08-25: the original version below (kept in the history
+  // note further down) was written in the same hollow-superlative marketing
+  // language that brand_voice.md exists to reject \u2014 "viral content
+  // architecture", "PhD-level understanding of consumer psychology",
+  // "reverse-engineer psychological triggers", "micro-conversion event". A
+  // persona written like a press release kept steering the model toward
+  // exactly the filler phrasing the Brand-Checker legitimately failed across
+  // every tested product category. This version is deliberately plain.
+  "backstory": "You write Instagram captions for a small in-house content team that works across a genuinely mixed roster \u2014 a phone one week, a snack the next, sneakers after that, sometimes a game or a personal-care product. You've learned that what actually works is specific and honest: naming the one real thing about a product that's worth mentioning, in the reader's own voice, without dressing it up. You've read enough over-written marketing copy to know exactly what makes people scroll past it \u2014 vague superlatives, forced excitement, phrases that could be pasted onto any product without changing a word. You'd rather write a caption that undersells slightly than one that sounds like it came out of a press release. You adjust naturally to whatever you're writing about \u2014 a caption for a graphics card reads differently than one for a snack \u2014 but you never reach for jargon or hype to fill space when you don't have something concrete to say.",
+
+  // Original backstory, kept for reference \u2014 this is the hype-heavy version
+  // that was replaced above:
+  // "You are the Director of Social Strategy at a top-tier digital marketing
+  // agency with 12 years of proven expertise in viral content architecture...
+  // Every caption is a micro-conversion event."
+
+  // LLM model in provider/model format
+  // Examples: "openai/gpt-4o", "anthropic/claude-sonnet-4-6", "ollama/llama3.3"
+  // For custom endpoints or deployment-based providers, replace with:
+  // "llm": {"model": "llama3", "provider": "ollama", "base_url": "http://localhost:11434"},
+  // "llm": {"deployment_name": "my-deployment", "provider": "azure", "api_version": "2024-10-21"},
+  "llm": "ollama/qwen2.5-7b-8k",
+
+  // Override LLM used specifically for tool/function calling
+  // "function_calling_llm": "openai/gpt-5.4-mini",
+
+  // Tools available to this agent
+  // Built-in: "SerperDevTool", "ScrapeWebsiteTool", "FileReadTool", etc.
+  // Custom: "custom:my_tool" loads from tools/my_tool.py
+  "tools": ["SerperDevTool"],
+
+  // Optional agent-level guardrail — validates this agent's final output.
+  // String guardrails are checked by an LLM and can reject/retry output.
+  // Python refs must point to module-level functions/classes in trusted code.
+  // "guardrail": "Only answer with information supported by retrieved evidence.",
+  // "step_callback": {"python": "my_project.callbacks.on_agent_step"},
+  // "guardrail_max_retries": 2,
+
+  // Advanced agent options:
+  // Docs: https://docs.crewai.com/concepts/agents
+  // "reasoning": true,
+  // "max_reasoning_attempts": 3,
+  // "planning_config": {
+  //   "reasoning_effort": "medium",
+  //   "llm": {"model": "deepseek-chat", "provider": "deepseek"}
+  // },
+  // "multimodal": false,
+  // "allow_code_execution": false,
+  // "code_execution_mode": "safe",
+  // "knowledge_sources": [],
+  // "knowledge_config": {},
+  // "inject_date": true,
+  // "date_format": "%Y-%m-%d",
+  // "security_config": {},
+
+  // Agent behavior settings
+  "settings": {
+    // Show detailed execution logs
+    "verbose": false,
+
+    // Allow this agent to delegate tasks to other agents in the crew
+    "allow_delegation": false,
+
+    // Safety net added 2026-08-25 after a live run hung for 15+ minutes on
+    // memory retrieval with near-zero CPU use (blocked, not computing) —
+    // no agent had any bound on task execution time, so a stall like that
+    // would wait forever. Raises TimeoutError instead (see agent/core.py:
+    // _execute_with_timeout) if a single task attempt exceeds this.
+    "max_execution_time": 300,
+
+    // Hard iteration cap, added 2026-08-27. CrewAI default is 25, far too
+    // loose here: crew memory is on, so CrewAI auto-injects Save-to-memory /
+    // Search-memory tools into EVERY agent (crew.py:1671, not disableable
+    // per-agent from JSONC), and each memory op measured 47-51s — two hit
+    // 499s and 439s. An RDR2 run burned 104 memory tool calls in THIS task
+    // (research_product_task), looping save->search->save on identical
+    // strings. 25 iterations x ~50s = 20+ min, so the default never bounded
+    // it in practice. 6 bounds worst case to ~5 min. This agent also needs
+    // real iterations for its web search, so don't drop below ~5.
+    "max_iter": 6
+
+    // Maximum tokens for agent's response generation
+    // "max_tokens": null,
+
+    // Maximum LLM requests per minute (rate limiting)
+    // "max_rpm": null,
+
+    // Enable agent-level memory (persists across tasks)
+    // "memory": false,
+
+    // Cache tool results to avoid duplicate calls
+    // "cache": true,
+
+    // Auto-summarize context when it exceeds the LLM's context window
+    // "respect_context_window": true,
+
+    // Maximum retries on execution errors
+    // "max_retry_limit": 2,
+
+    // Enable step-by-step planning before task execution
+    // "planning": false
+
+    // Include system prompt in LLM calls
+    // "use_system_prompt": true
+
+  }
+}

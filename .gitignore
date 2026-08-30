@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+.DS_Store
+report.md
+
+# Local run artifacts — full prompt/response transcripts, not for publication
+crew.log.txt
+*.log
+.last_product.json
+
+# Local Claude Code config — machine-specific, not project state
+.claude/

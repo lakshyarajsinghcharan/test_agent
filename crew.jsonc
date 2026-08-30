@@ -1,0 +1,309 @@
+{
+  // Display name for this crew
+  "name": "test_agent",
+
+  // Agents to include — each must have a matching agents/<name>.jsonc file
+  "agents": ["strategist", "copywriter", "designer_brief_writer", "brand_checker", "scheduler"],
+
+  // Task definitions — executed in order for sequential process
+  "tasks": [
+    {
+      // Task identifier
+      "name": "strategy_task",
+
+      // What the task should accomplish
+      // Use {placeholder} inputs here; crewai run prompts for missing values
+      "description": "Using {product_name} and the research already available, define: (1) a core content theme, (2) the primary target audience, (3) a specific content angle that differentiates this post from generic product marketing. Be concise and specific — no generic filler like 'young professionals' without more detail. Your output feeds the Copywriter directly, so do NOT phrase the angle using marketing filler the brand bans — avoid 'elevate your experience', 'unlock', 'seamless', 'revolutionary', 'cutting-edge', 'best-in-class', 'industry-leading', 'unmatched', and 'indulgent'. State the angle in plain, concrete language instead, so the Copywriter isn't tempted to carry a banned phrase into the caption.",
+
+      // Clear definition of what the output should look like
+      "expected_output": "A short structured output with three clearly labeled sections: Theme, Target Audience, Content Angle — each 1-2 sentences.",
+
+      // Which agent handles this task
+      // No "context" here — this is the entry point of the crew, it runs first with no prior task output
+      "agent": "strategist"
+    },
+
+    {
+      // Task identifier
+      "name": "research_product_task",
+
+      // What the task should accomplish
+      // Use {placeholder} inputs here; crewai run prompts for missing values
+      // Hardened 2026-08-25 after a live run: for {product_name}='Nutella'
+      // the model's OWN search query was 'Nutella features NVIDIA GeForce
+      // RTX 5060' — it baked a hallucinated GPU association (almost
+      // certainly primed by memory recall, since the store is full of prior
+      // tech/gaming-product runs) into the query BEFORE searching at all, so
+      // "only use facts from search results" wasn't enough — the results
+      // were real, the premise feeding the query was already contaminated.
+      "description": "Research {product_name} using web search to understand its key features, target audience, and unique selling points, then write one compelling Instagram caption under 280 characters that highlights the most engaging aspect of the product. Only use facts found directly in the search results — never blend in knowledge about competitor products or other devices. Your search query itself must contain ONLY the literal product name {product_name} plus a neutral generic term like 'features' or 'specs' or 'reviews' — never any other product name, brand, or technology. If the search results are unclear or insufficient to support a specific claim, state that explicitly rather than guessing or inventing a fact. Before finalizing, double-check that the product name in the caption matches the input product name exactly. Before writing, read brand_voice.md from the project root in full (Universal rules, Category-flex, Jargon vs. specs).\n\nHOW TO WRITE A CAPTION THAT PASSES — follow these four rules literally, they are where captions actually fail:\n\n(1) SECOND PERSON, ALWAYS. Universal rule #1. Talk TO the reader about their life. NEVER open with the product name followed by 'offers' / 'features' / 'delivers' / 'displays' / 'is designed to' — that is a product-brochure sentence, not an Instagram caption, and it fails on the spot. Open with 'you', with an image, or with a question.\n\n(2) SPECS ARE GOOD — BARE SPEC-DUMPS ARE NOT. Naming a real number, material, ingredient, or mechanic is explicitly ALLOWED and encouraged (see the Jargon vs. specs section: a true fact about THIS product is never jargon). What fails is stating the spec and stopping. Always land the spec on what it means for the reader — and that landing must ITSELF be concrete and specific to this product: a sensory detail, a real moment, an observable result. A generic capability claim that any competitor could copy word-for-word ('cleans in minutes', 'saves you time', 'makes life easier', 'gets the job done') fails the swap test just as hard as a banned buzzword does. Also: never compare against another product by name, including earlier models from the same brand — talk about what THIS product does, not what it beats.\n\n(3) NEVER USE THE BANNED FILLER, even if the Strategist's angle above used it. The Strategist writes internal strategy notes, not brand-checked copy — if their angle contains 'elevate your experience', 'unlock', 'seamless', 'revolutionary', 'cutting-edge', 'best-in-class', 'industry-leading', 'unmatched', or 'indulgent' as a stand-in for a real detail, do NOT carry that phrasing into your caption. Take their THEME and ANGLE, write your own words. Test every phrase: if it would work unchanged on a completely different product in a different category, cut it.\n\n(4) PUNCHY. Short sentences. Fragments are fine. Max 2 emojis — count them, 3 is a failure.\n\n(5) NO INVENTED HYPE, AND NO INVENTED ANECDOTES. Vivid writing must still be anchored to a real researched fact. Phrases like 'off the charts', 'flavor adventure', 'snack magic', 'game-changer', 'next level' fail the swap test exactly like the banned list does — they are hype standing where a fact should be. Equally, never write a first-person personal story ('outlasted my last three pairs', 'I wore these for a year') — you have no such experience and it is not in the search results. Stay second-person and factual.\n\n(6) OUTPUT FORMAT — CRITICAL. Your final answer must be the caption text and NOTHING else. No preamble, no 'Based on the search results...', no 'Here is the Instagram caption:', no surrounding quotation marks, no explanation of your reasoning afterwards. Just the caption itself, ready to paste into Instagram. A past run leaked its reasoning into the caption field and failed brand check for it.\n\nCONCRETE BEFORE/AFTER — study the pattern, these are other products deliberately, do not copy their content:\n\n- BAD: 'The Acme X1 laptop offers 18 hours of battery life, ensuring uninterrupted productivity.' (opens with product name + 'offers', bare spec, third person)\n  GOOD: 'Leave the charger at home. 18 hours outlasts your workday, your flight, and your willpower.' (same spec, second person, lands on the reader's life)\n\n- BAD: 'Our coffee delivers an indulgent, best-in-class experience that elevates your morning.' (three banned filler phrases, zero real facts)\n  GOOD: 'Roasted Tuesday, in your cup Thursday. You'll taste the difference before you finish the first sip.' (concrete, specific, second person)\n\n- BAD: 'These running shoes feature a 4mm heel drop and responsive foam for unmatched performance.' (spec-dump ending in a banned word)\n  GOOD: '4mm drop. Foam that actually springs back. Your knees will notice on mile six.' (identical specs, punchy, benefit landed)\n\n- BAD: 'This jacket maintains its original integrity and timeless appeal for the modern professional.' (formal, third person, says nothing concrete)\n  GOOD: 'Waxed cotton that gets better the more you beat it up. Year three is when it starts looking like yours.' (specific material, second person, real)\n\nWrite the caption in line with the Strategist's theme, audience, and angle, adapting HOW the rules show up to {product_name}'s category per Category-flex (tech can be confidently spec-forward; food/lifestyle must avoid vague 'treat yourself' filler; adult-adjacent can be cheeky and platform-appropriate; mature games should lead on story/world, not gore). The Brand-Checker after you rejects anything reading like generic marketing filler, so the caption must already satisfy brand_voice.md when you submit it.\n\nTOOL ARGUMENTS: the web search tool takes a flat string argument named search_query (e.g. search_query: '{product_name} features') — never nest it inside another object.",
+
+      // Clear definition of what the output should look like
+      "expected_output": "A single Instagram caption, 280 characters or less, that mentions one specific researched fact about {product_name} sourced directly from the search results (no competitor or unrelated-product facts), includes a clear hook in the first line, and refers to the product by its exact input name.",
+
+      // Prior task outputs this task receives as additional context
+      "context": ["strategy_task"],
+
+      // Optional task guardrail(s) validate output before completion
+      // Use "guardrail" for one rule or "guardrails" for many
+      // Failed guardrails retry up to guardrail_max_retries times
+      // "guardrail": "Every factual claim needs context support.",
+      // "guardrails": [
+      //   "Every factual claim must be supported by context.",
+      //   "The answer must match the expected output format."
+      // ],
+      // "guardrail_max_retries": 2,
+
+      // Advanced task options:
+      // Docs: https://docs.crewai.com/concepts/tasks
+      // "type": "ConditionalTask",
+      // "condition": { "python": "my_project.conditions.should_run" },
+      // "output_json": { "python": "my_project.models.ReportOutput" },
+      // "output_pydantic": null,
+      // "response_model": null,
+      // "converter_cls": { "python": "my_project.converters.CustomConverter" },
+      // "markdown": false,
+      // "input_files": { "brief": "data/brief.txt" },
+      // "security_config": {},
+
+      // Which agent handles this task
+      "agent": "copywriter"
+
+      // "tools": [],
+      // "human_input": false,
+      // "async_execution": false
+    },
+
+    {
+      // Task identifier
+      "name": "visual_brief_task",
+
+      // Hardened 2026-08-26, strengthened same day after review: same
+      // memory-contamination pattern found in research_product_task's
+      // search query also showed up here — an iPhone 16 run produced a
+      // visual brief depicting "a rich, creamy croissant or Nutella spread
+      // on a cracker" next to the phone, and separately, Durex and RDR2 runs
+      // (both predating this fix) produced visual briefs full of "kitchen
+      // counter", "snack", "Classic Culinary Comfort", "chocolate" — all
+      // bled in from an unrelated Nutella run's memory. Every task gets
+      // automatic memory recall regardless of relevance, so this needs the
+      // same explicit, concrete guard as research_product_task, not just a
+      // general "ignore contamination" instruction.
+      "description": "Based on the final caption from the Copywriter task, write a visual brief describing what the accompanying image or short video should depict — include subject focus, mood/tone, setting, and one specific visual detail tied to the product fact used in the caption. Every object, setting, and detail in the brief must make sense for {product_name} specifically — if memory recall surfaces a different product name, a different product category (e.g. food/kitchen/snack imagery for a non-food product, or vice versa), or any theme that doesn't match what the caption is actually about, that's contamination from an unrelated past run, not a real detail about this product — ignore it completely, do not include it in the brief even as a background element. Before finalizing, check every noun in your brief against {product_name}'s actual category. Write the brief in plain, concrete direction — describe what the camera sees. Do NOT use the brand's banned filler words ('elevate', 'seamless', 'cutting-edge', 'unmatched', 'indulgent', 'best-in-class', 'revolutionary'), since the Brand-Checker judges your brief against the same Universal rules as the caption.",
+
+      // Clear definition of what the output should look like
+      "expected_output": "A visual brief of 2-4 sentences: what's shown, the mood/style, and how it ties to the caption's key fact.",
+
+      // Prior task outputs this task receives as additional context
+      "context": ["research_product_task"],
+
+      // Which agent handles this task
+      "agent": "designer_brief_writer"
+    },
+
+    {
+      // Task identifier
+      "name": "brand_check_task",
+
+      // What the task should accomplish
+      "description": "Read brand_voice.md from the project root using the file read tool, in full — it has three sections: Universal rules, Category-flex, and Jargon vs. specs. Compare both the caption (from the Copywriter task) and the visual brief (from the Designer-Brief-Writer task) against the Universal rules section specifically — that section is what applies to every product the same way, and is what you should PASS or FAIL against. Use the Category-flex section only to judge whether a given execution of the universal rules fits the product's category (e.g. confident-about-real-specs for tech, story/world-focused for a mature game, cheeky-but-platform-appropriate for an adult-adjacent product) — never fail a caption merely for reading differently than a caption in a different category would, or merely for naming concrete specs/ingredients/mechanics that are genuinely true of the product. Only fail for jargon if it's hollow filler per the Jargon vs. specs section. EVIDENCE REQUIREMENT — this is the most important instruction in this task, and past runs have failed it repeatedly. You may only FAIL on a rule that is written verbatim in brand_voice.md. If you FAIL, you MUST quote the exact sentence or bullet from the file that the content violates. If you cannot quote it word-for-word from the file you just read, that rule does not exist and you may NOT fail on it — verdict PASS instead. Real examples of invented rules from past runs, all of which were wrong: 'Be honest; avoid jargon', 'language should be warm and personal', 'avoid overly technical language', 'claims must be verifiable', 'the universal rules demand a grounded, factual tone'. None of those appear in brand_voice.md. Do not invent rules of this kind.\n\nSPECS ARE NOT JARGON — do not fail on this, it is the single most common past mistake. The file's Jargon vs. specs section states that a specific, true fact about the product is NOT jargon and should be kept, and the Category-flex tech bullet explicitly permits naming the chip, GPU, VRAM, refresh rate, battery life, and resolution. So a real number or unit (e.g. a TFLOPS figure, a wattage, an hours-of-battery figure, a thread count, a horsepower number) is ALWAYS acceptable, even if a casual reader wouldn't recognize the unit. 'Too technical for the audience' and 'readers may not understand this term' are NOT rules in this file and are never valid failure reasons. Jargon means hollow filler that could be swapped onto any product in any category ('best-in-class', 'revolutionary', 'elevate your experience') — judge against THAT test only.\n\nWhat you SHOULD fail: banned filler phrases listed in the file, third-person voice where second-person is required, more than 2 emojis, over-selling/inflated claims not supported by a real fact, or vague claims with no concrete detail at all. FORMAT — this is mandatory and has failed before: your response must begin with the single word PASS or the single word FAIL, alone on the first line, with nothing else on that line (no punctuation, no bold, no preamble). Put your reasoning starting on the SECOND line, citing which specific universal rule was or wasn't met. TOOL ARGUMENTS: the file read tool takes a string argument named file_path (e.g. file_path: 'brand_voice.md').",
+
+      // Clear definition of what the output should look like
+      "expected_output": "A verdict beginning with exactly 'PASS' or 'FAIL' on the first line, followed by 1-3 sentences of specific reasoning referencing the brand voice rules.",
+
+      // Prior task outputs this task receives as additional context
+      "context": ["research_product_task", "visual_brief_task"],
+
+      // Format-only guardrail: enforces that a verdict token is present and
+      // unambiguous. Deliberately does NOT require the verdict to say PASS —
+      // an LLM guardrail is itself an LLM judge asked "does this comply?", so
+      // a guardrail demanding PASS would just force this agent to keep
+      // retrying a genuine FAIL until it caves and says PASS, defeating the
+      // point of the check. Real outcome-based gating happens in
+      // schedule_task's own instructions instead (see note there).
+      "guardrail": "Reject this output if it does not begin with the exact word PASS or the exact word FAIL on its own line. The verdict must be unambiguous. Do not evaluate whether PASS or FAIL was the 'right' choice — only whether the output is well-formed.",
+      "guardrail_max_retries": 2,
+
+      // Which agent handles this task
+      "agent": "brand_checker"
+    },
+
+    {
+      // Task identifier
+      "name": "schedule_task",
+
+      // What the task should accomplish
+      // NOTE on conditional scheduling: this is a sequential JSONC crew, not a
+      // Flow, so there is no native "skip this task if X" gate — that needs
+      // crewai Flows. This description substitutes for it by having the agent
+      // itself branch on the Brand-Checker's verdict content.
+      // EXISTING CALENDAR CONTENT is injected as {existing_calendar} by the
+      // before_kickoff_callback (hooks/inject_existing_calendar.py) — do NOT
+      // call a read tool for content_calendar.md, its current content is
+      // already given to you below. This removes a whole Thought/Action/
+      // Observation round trip from this task's tool loop, which mattered:
+      // this was the only task in the crew needing 2+ sequential tool calls
+      // with a conditional branch between them, and the ONLY task reading a
+      // file whose size grows with every successful run — both verified as
+      // real contributors to 'Invalid response from LLM call - None or
+      // empty' failures on this task specifically (checked via source: the
+      // executor resends the full growing message list on every loop
+      // iteration within a single task — see crew_agent_executor.py).
+      // FIXED (live run, 2026-08-19): this task's "context" used to list only
+      // brand_check_task, so schedule_task never actually received the real
+      // caption or visual brief text — only the Brand-Checker's terse verdict.
+      // With nothing concrete to build a NEW entry from, the model fell back
+      // to echoing the EXISTING CALENDAR CONTENT block verbatim as its
+      // "answer" (an ASUS TUF A14 run produced a calendar entry for the OLD
+      // PlayStation 5 Pro product) — which also corrupted content_calendar.md
+      // when it got written. Now lists all three upstream tasks so the actual
+      // caption and visual brief are genuinely present in context.
+      "description": "Use ONLY the ACTUAL caption (from Copywriter) and ACTUAL visual brief (from Visual Brief Writer) given to you in context below for the NEW entry's Product Name/Caption/Visual Brief — never ignore mismatched product names, and never copy the EXISTING CALENDAR CONTENT block below into the new entry, that block is prior history shown for reference only. Check the Brand-Checker's verdict — the FIRST WORD of its output is the verdict and it is the ONLY thing that decides your branch.\n\nIf that first word is FAIL: write no file; answer exactly 'NOT SCHEDULED - Brand check failed' plus the stated reasons, then stop.\n\nIf that first word is PASS: you MUST produce a calendar entry. This is not a judgement call and you have no discretion here. It is FORBIDDEN to answer 'NOT SCHEDULED' when the verdict is PASS — no matter what happens next. Specifically: if a previous attempt of yours was rejected for formatting, if the write tool returned an error, if you think the caption could be better, or if you are unsure — none of those are brand-check failures, and none of them permit NOT SCHEDULED. In every one of those cases the correct action is the SAME: fix the FORMAT of your entry and submit the entry again. Past runs have failed by panicking after a format rejection and flipping to 'NOT SCHEDULED' on a verdict that plainly said PASS, which silently loses approved content. Do not do this. New entry fields: Product Name, Caption, Visual Brief, Brand Check Status, Suggested Post Date: TBD.\n\n--- EXISTING CALENDAR CONTENT (already provided — do not use a read tool for this, and do not pass this back to the write tool) ---\n{existing_calendar}\n--- END EXISTING CALENDAR CONTENT ---\n\nTOOL ARGUMENTS: call the Calendar Writer Tool with exactly one argument, content: <ONLY the new entry's five fields>. The tool appends to the existing file itself and preserves prior entries automatically — do NOT include the existing entries above in what you pass, and do not try to rewrite the whole file. There is no filename or overwrite argument, do not invent one. This is the ONLY tool call this task should make.",
+
+      // Clear definition of what the output should look like
+      "expected_output": "If the Brand-Checker's verdict was FAIL: the exact text 'NOT SCHEDULED - Brand check failed' plus the reasons, with nothing written to disk. If the verdict was PASS: confirmation that a new entry was appended to content_calendar.md (previous entries intact), plus the exact markdown block that was added.",
+
+      // Prior task outputs this task receives as additional context — MUST
+      // include research_product_task and visual_brief_task, not just
+      // brand_check_task's verdict (see FIXED note above).
+      "context": ["research_product_task", "visual_brief_task", "brand_check_task"],
+
+      // Deterministic Python guardrail — NOT an LLM judge. This is a pure
+      // format/shape check (five labeled fields + literal 'PASS', or a
+      // literal opening string), which is fully specifiable as code. Using an
+      // LLM to judge it means using the SAME small local model that's also
+      // the one producing the output (LLMGuardrail always runs on
+      // self.agent.llm, see task.py) — no capability gap between actor and
+      // grader, and this model already needed guardrail_max_retries bumped to
+      // reliably comply with a simpler prior version of this rule (see history
+      // below). A regex/string check removes that failure mode entirely for
+      // this task. Function lives at guardrails/schedule_guardrail.py.
+      // caught the ASUS-TUF-A14-under-RDR2-run failure mode (that output was
+      // neither a clean calendar entry nor the NOT SCHEDULED text, it was a
+      // rambling hallucination that this guardrail would now reject).
+      // guardrail_max_retries restored to 2 (3 attempts total). It was
+      // temporarily 1 while the model ran on a 4096-token context, since each
+      // retry resends the full prior transcript. With qwen2.5-7b-8k (8192) plus
+      // the trimmed description/guardrail there is now headroom for the extra
+      // attempt, and a malformed tool call is exactly the kind of transient
+      // failure a retry recovers from.
+      "guardrail": { "python": "guardrails.schedule_guardrail.validate_schedule_output" },
+      "guardrail_max_retries": 2,
+
+      // Which agent handles this task
+      "agent": "scheduler"
+    }
+
+  ],
+
+  // Execution process
+  // "sequential" — tasks run in order, each receiving prior task outputs
+  // "hierarchical" — a manager agent delegates tasks (requires manager_llm)
+  "process": "sequential",
+
+  // Enable verbose logging during execution
+  "verbose": true,
+
+  // Crew memory DISABLED (2026-08-28). History: memory was crew-wide not
+  // per-product-scoped (cross-product contamination — Nutella/RTX-5060,
+  // Nike/snack-and-iPhone bleed, RDR2/Nutella bleed, see prior runs), and
+  // CrewAI auto-injects 'Search memory'/'Save to memory' tools onto EVERY
+  // agent whenever this flag is true — unconditionally, with no per-task or
+  // per-agent override available (checked crewai/crew.py _prepare_tools:
+  // memory-tool injection runs after task.tools resolve and always appends;
+  // checked agent resolved_memory = getattr(agent,"memory",None) or
+  // self._memory — no per-agent JSONC opt-out exists while crew memory is
+  // on). Prompt-level "DO NOT CALL THEM" bans in every task description
+  // (still present below, harmless no-ops now) did NOT reliably stop calls —
+  // schedule_task looped into a memory_recall call that hung 120s and
+  // cascaded into "Invalid response from LLM call - None or empty" even with
+  // max_iter=6 as a backstop. Given repeated evidence memory was net-negative
+  // for this crew's reliability, turned off entirely rather than fought
+  // further. hooks/reset_memory_for_product.py and hooks/prune_memory.py
+  // (memory-store maintenance) are now unused — see before_kickoff_callbacks
+  // below.
+  "memory": false,
+
+  // Unused now that "memory" is false above (embedder only matters when
+  // memory storage is active) — left in place, harmless, in case memory is
+  // re-enabled later.
+  // Embedder used by crew memory storage (Chroma) — defaults to OpenAI otherwise,
+  // which requires CHROMA_OPENAI_API_KEY. Point it at local Ollama instead.
+  "embedder": {
+    "provider": "ollama",
+    "config": {
+      "model_name": "nomic-embed-text",
+      "url": "http://localhost:11434/api/embeddings"
+    }
+  },
+
+  // Log every task's full output and per-retry guardrail rejection reasons to
+  // this file, even when a task ultimately fails — otherwise that data is
+  // lost the moment a guardrail exhausts its retries (CrewAI only persists
+  // to latest_kickoff_task_outputs.db AFTER a task succeeds).
+  "output_log_file": "crew.log",
+
+  // Single maintenance callback that runs before every kickoff: injects
+  // content_calendar.md's current content into inputs as {existing_calendar}
+  // so schedule_task can reference it as literal text instead of calling
+  // FileReadTool, and rotates that file to an archive once it grows past a
+  // size threshold so this task's prompt doesn't grow forever the more the
+  // crew is used. See hooks/inject_existing_calendar.py.
+  //
+  // Two callbacks previously registered here — hooks/prune_memory.py and
+  // hooks/reset_memory_for_product.py — were memory-store maintenance and are
+  // now unused: memory is disabled (see "memory" field above), so there's no
+  // store left to prune or reset. Left in place but marked dead at the top of
+  // each file rather than deleted, since both document real contamination
+  // incidents (RTX-5060/Nutella bleed, Nike/snack bleed) worth keeping if
+  // memory is ever re-enabled with proper per-product scoping. Not re-wired
+  // here — do not re-add them without re-enabling "memory" first.
+  "before_kickoff_callbacks": [
+    { "python": "hooks.inject_existing_calendar.inject_existing_calendar" }
+  ],
+
+  // Automatically plan the execution strategy before running tasks
+  // "planning": false,
+
+  // LLM for the planning step (used when planning is true)
+  // "planning_llm": "openai/gpt-4o",
+
+  // LLM for the manager agent (required when process is "hierarchical")
+  // "manager_llm": "openai/gpt-4o",
+
+  // Crew-level LLM fields also accept object form for custom endpoints
+  // "chat_llm": {"model": "llama3", "provider": "ollama", "base_url": "http://localhost:11434"},
+
+  // Advanced crew options:
+  // Docs: https://docs.crewai.com/concepts/crews
+  // For hierarchical crews, manager_agent can reference an agents/<name>.jsonc file
+  // that is not included in the "agents" list.
+  // "manager_agent": "copywriter",
+  // "before_kickoff_callbacks": [{"python": "my_project.callbacks.before_kickoff"}],
+  // "after_kickoff_callbacks": [{"python": "my_project.callbacks.after_kickoff"}],
+  // "function_calling_llm": "openai/gpt-4o-mini",
+  // "max_rpm": null,
+  // "cache": true,
+  // "knowledge_sources": [],
+  // "embedder": {},
+  // "output_log_file": "crew.log",
+  // "stream": false,
+  // "tracing": false,
+  // "security_config": {},
+
+  // Optional runtime input defaults.
+  // Use {placeholder} in agent or task text, for example:
+  // "description": "Research {topic} and write a brief"
+  // `crewai run` prompts for any placeholders missing from this object.
+  // "existing_calendar" MUST stay here (even as an empty string). The CLI's
+  // interactive `crewai run` scans every task description for {placeholder}
+  // patterns BEFORE kickoff to decide what to prompt for (crewai_cli/
+  // run_crew.py: _referenced_input_names / _resolve_crew_inputs) — it has no
+  // idea before_kickoff_callbacks exist. Any key present here counts as
+  // "already provided" and is never prompted for. The real value still comes
+  // from hooks/inject_existing_calendar.py at actual kickoff time — that
+  // callback overwrites whatever's here, this default only exists to stop
+  // the CLI's pre-kickoff scan from treating {existing_calendar} in
+  // schedule_task's description as a value the user must type in.
+  "inputs": { "existing_calendar": "" }
+}
